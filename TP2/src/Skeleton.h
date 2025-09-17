@@ -237,18 +237,39 @@ struct Skeleton {
         //---------------------------------------------------//
         //---------------------------------------------------//
         // code to change :
-
+        computeGlobalTransformationParameters(transfoIK);
         // You should orient the articulation towards target position: -> find R
         // Note: you can use Mat3::getRotationMatrixAligning
         int iteration {0};
         Vec3 end = transfoIK.articulations_transformed_position[targetArticulation] - targetPosition;
         float dist{end.length()};
-        int currentIdA{targetArticulation};
+        Vec3 currPos{transfoIK.articulations_transformed_position[targetArticulation]};
+
         while(  dist > epsilonPrecision && iteration < maxIterNumber ){
-            Articulation& currentArt =  articulations[currentIdA-1]; 
-            while(!currentArt.isRoot()){
-                Bone& b = bones[currentArt.fatherBone];
+
+            int idBone = articulations[targetArticulation].fatherBone; 
+
+            while( idBone > -1 ){
+                const Bone& b = bones[idBone];
+
+                unsigned int a0 = b.joints[0];
+                Vec3& art = transfoIK.articulations_transformed_position[a0];
+
+                Vec3 a0ToCurr = currPos - art;
+                Vec3 a0ToTarg = targetPosition - art;
+
+                a0ToCurr.normalize();
+                a0ToTarg.normalize();
+
+                Mat3 rotation = Mat3::getRotationMatrixAligning(a0ToCurr, a0ToTarg);
+
+    
+
+                computeGlobalTransformationParameters(transfoIK);
+                currPos = transfoIK.articulations_transformed_position[targetArticulation];
+                idBone = bones[idBone].fatherBone;
             }
+            dist = (currPos - targetPosition).length();
             ++iteration;
         }
 
