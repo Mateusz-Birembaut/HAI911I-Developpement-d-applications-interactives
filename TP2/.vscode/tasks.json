@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build TP2",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "mkdir -p build && g++ -std=c++14 -O0 -g -Wall -Wextra src/*.cpp -I src -o build/TP2 -lglut -lGL -lGLU -lm"
+      ],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+
+}

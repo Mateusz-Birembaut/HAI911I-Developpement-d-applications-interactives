@@ -50,18 +50,26 @@
 
 #include "mainwindow.h"
 #include "window.h"
+//#include "Mesh.h"
+
 #include <QMenuBar>
 #include <QMenu>
 #include <QMessageBox>
+#include <QFileDialog>
 
 MainWindow::MainWindow()
 {
     QMenuBar *menuBar = new QMenuBar;
     QMenu *menuWindow = menuBar->addMenu(tr("&Window"));
+    QMenu *menuMesh = menuBar->addMenu("&Mesh");
     QAction *addNew = new QAction(menuWindow);
+    QAction *loadMesh = new QAction(menuWindow);
     addNew->setText(tr("Add new"));
+    loadMesh->setText(tr("Load Mesh"));
     menuWindow->addAction(addNew);
+    menuMesh->addAction(loadMesh);
     connect(addNew, &QAction::triggered, this, &MainWindow::onAddNew);
+    connect(loadMesh, &QAction::triggered, this, &MainWindow::onLoadMesh);
     setMenuBar(menuBar);
 
     onAddNew();
@@ -74,3 +82,21 @@ void MainWindow::onAddNew()
     else
         QMessageBox::information(0, tr("Cannot add new window"), tr("Already occupied. Undock first."));
 }
+
+void MainWindow::onLoadMesh(){
+    // ajouter une sous fenetre
+    // avec un filePath
+    // un bouton load
+    // bouton cancel
+    QString fileName = QFileDialog::getOpenFileName(this, "Load a mesh", "", "Mesh Files (*.off);; All Files(*)");
+    if(!fileName.isEmpty()){
+        emit meshFileSelected(fileName);
+    }
+}
+
+
+
+
+
+
+

@@ -7,7 +7,8 @@ HEADERS       = glwidget.h \
                 Mesh.h \
                 window.h \
                 mainwindow.h \
-                logo.h
+                logo.h \
+                FileLoader.h
 SOURCES       = glwidget.cpp \
                 Mesh.cpp \
                 main.cpp \

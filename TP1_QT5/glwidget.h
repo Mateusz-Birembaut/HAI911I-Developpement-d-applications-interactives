@@ -51,15 +51,13 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-
-#include "Mesh.h"
-
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
-#include "logo.h"
+//#include "logo.h"
+#include "Mesh.h"
 
 QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
 
@@ -83,12 +81,15 @@ public slots:
     void setYRotation(int angle);
     void setZRotation(int angle);
     void cleanup();
+    void loadMeshFromFile(const QString& filePath);
 
 signals:
+
     //Completer : ajouter des signaux pour signaler des changement de rotation
-    void transmit_x_rotation(int angle);
-    void transmit_y_rotation(int angle);
-    void transmit_z_rotation(int angle);
+    void transmitXRotation(int angle);
+    void transmitYRotation(int angle);
+    void transmitZRotation(int angle);
+
 
 protected:
     void initializeGL() override;
@@ -96,6 +97,7 @@ protected:
     void resizeGL(int width, int height) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent* event) override;
 
 private:
     void setupVertexAttribs();
@@ -104,15 +106,12 @@ private:
     int m_xRot;
     int m_yRot;
     int m_zRot;
+    float m_cameraZ{1.0f};
     QPoint m_last_position;
-    Logo m_logo;
+    //Logo m_logo;
     Mesh m_mesh;
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_logoVbo;
-
-    QOpenGLBuffer m_vertexBuffer;
-    QOpenGLBuffer m_indexBuffer;
-
     QOpenGLShaderProgram *m_program;
     int m_mvp_matrix_loc;
     int m_normal_matrix_loc;

@@ -60,8 +60,15 @@ class MainWindow : public QMainWindow
 public:
     MainWindow();
 
+signals:
+     void meshFileSelected(const QString &filePath);
+
 private slots:
     void onAddNew();
+    void onLoadMesh();
 };
+
+private:
+    GLWidget* m_activeGLWidget = nullptr;
 
 #endif

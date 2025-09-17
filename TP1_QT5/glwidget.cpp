@@ -49,12 +49,12 @@
 ****************************************************************************/
 
 #include "glwidget.h"
-
 #include <QMouseEvent>
 #include <QOpenGLShaderProgram>
 #include <QCoreApplication>
 #include <math.h>
 
+#include <iostream>
 
 bool GLWidget::m_transparent = false;
 
@@ -73,10 +73,6 @@ GLWidget::GLWidget(QWidget *parent)
         fmt.setAlphaBufferSize(8);
         setFormat(fmt);
     }
-
-    m_vertexBuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    m_indexBuffer = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
-
 }
 
 GLWidget::~GLWidget()
@@ -108,7 +104,7 @@ void GLWidget::setXRotation(int angle)
     if (angle != m_xRot) {
         m_xRot = angle;
         //Completer pour emettre un signal
-        emit transmit_x_rotation(angle);
+        emit transmitXRotation(angle);
         update();
     }
 }
@@ -119,7 +115,7 @@ void GLWidget::setYRotation(int angle)
     if (angle != m_yRot) {
         m_yRot = angle;
         //Completer pour emettre un signal
-        emit transmit_y_rotation(angle);
+        emit transmitYRotation(angle);
         update();
     }
 }
@@ -130,7 +126,7 @@ void GLWidget::setZRotation(int angle)
     if (angle != m_zRot) {
         m_zRot = angle;
         //Completer pour emettre un signal
-        emit transmit_z_rotation(angle);
+        emit transmitZRotation(angle);
         update();
     }
 }
@@ -140,11 +136,9 @@ void GLWidget::cleanup()
     if (m_program == nullptr)
         return;
     makeCurrent();
-    m_logoVbo.destroy();
+    //m_logoVbo.destroy();
     delete m_program;
     m_program = 0;
-    m_vertexBuffer.destroy();
-    m_indexBuffer.destroy();
     doneCurrent();
 }
 
@@ -190,40 +184,33 @@ void GLWidget::initializeGL()
     // implementations this is optional and support may not be present
     // at all. Nonetheless the below code works in all cases and makes
     // sure there is a VAO when one is needed.
+
     m_vao.create();
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
 
-    m_vertexBuffer.create();
-    m_vertexBuffer.bind();
-    m_vertexBuffer.allocate(m_mesh.getVertices().data(), m_mesh.getVerticesSize() * sizeof(Vertex));
-    m_vertexBuffer.release();
+    // Setup our vertex buffer object.
+    //m_logoVbo.create();
+    //m_logoVbo.bind();
+    //m_logoVbo.allocate(m_logo.constData(), m_logo.count() * sizeof(GLfloat));
 
-    m_indexBuffer.create();
-    m_indexBuffer.bind();
-    m_indexBuffer.allocate(m_mesh.getIndices().data(), m_mesh.getIndexesSize() * sizeof(unsigned int));
-    m_indexBuffer.release();
-
-    setupVertexAttribs();
+    // Store the vertex attribute bindings for the program.
+    //setupVertexAttribs();
 
     // Our camera never changes in this example.
     m_view.setToIdentity();
-    m_view.translate(0, 0, -1);
+    m_view.translate(0, 0, -m_cameraZ);
 
     // Light position is fixed.
     m_program->setUniformValue(m_light_pos_loc, QVector3D(0, 0, 70));
+
+    m_mesh.createRectangleMesh(0.5f,0.25f,0.5f, {0.0f,0.0f,0.0f});
+    //m_mesh.loadOff("/home/mat/Downloads/woman_20.off");
 
     m_program->release();
 }
 
 void GLWidget::setupVertexAttribs()
 {
-    m_vertexBuffer.bind();
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(sizeof(Vec3)));
-    m_vertexBuffer.release();
-    /*
     m_logoVbo.bind();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     f->glEnableVertexAttribArray(0);
@@ -231,7 +218,6 @@ void GLWidget::setupVertexAttribs()
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
     f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
     m_logoVbo.release();
-    */
 }
 
 void GLWidget::paintGL()
@@ -255,10 +241,9 @@ void GLWidget::paintGL()
     // Set normal matrix
     m_program->setUniformValue(m_normal_matrix_loc, normal_matrix);
 
+    //glDrawArrays(GL_TRIANGLES, 0, m_logo.vertexCount());
 
-    m_indexBuffer.bind();
-    glDrawElements(GL_TRIANGLES, m_mesh.getIndexesSize(), GL_UNSIGNED_INT, nullptr);
-    m_indexBuffer.release();
+    m_mesh.draw();
 
     m_program->release();
 }
@@ -274,17 +259,50 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
     m_last_position = event->pos();
 }
 
+void GLWidget::wheelEvent(QWheelEvent* event) {
+    int delta = event->angleDelta().y();
+
+    constexpr float zoomStep = 0.1f;
+
+    m_cameraZ -= delta / 120.0f * zoomStep;
+
+    if (m_cameraZ < 0.1f) m_cameraZ = 0.1f;
+    if (m_cameraZ > 10.0f) m_cameraZ = 50.0f;
+
+    m_view.setToIdentity();
+    m_view.translate(0, 0, -m_cameraZ);
+
+    update();
+    event->accept();
+}
+
+
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
     int dx = event->x() - m_last_position.x();
     int dy = event->y() - m_last_position.y();
 
     if (event->buttons() & Qt::LeftButton) {
-        setXRotation(m_xRot + 8 * dy);
-        setYRotation(m_yRot + 8 * dx);
+        setXRotation(m_xRot + 8 * -dy);
+        setYRotation(m_yRot + 8 * -dx);
     } else if (event->buttons() & Qt::RightButton) {
-        setXRotation(m_xRot + 8 * dy);
-        setZRotation(m_zRot + 8 * dx);
+        setXRotation(m_xRot + 8 * -dy);
+        setZRotation(m_zRot + 8 * -dx);
     }
     m_last_position = event->pos();
 }
+
+
+void GLWidget::loadMeshFromFile(const QString &filePath) {
+    if (filePath.isEmpty()) return;
+    m_mesh.loadFile(filePath.toStdString());
+    update();
+}
+
+
+
+
+
+
+
+

@@ -1,100 +1,40 @@
 #ifndef MESH_H
 #define MESH_H
 
+#include "Vec3.h"
+
+#include<QOpenGLBuffer>
+#include<QOpenGLContext>
+#include<QOpenGLVertexArrayObject>
+#include <filesystem>
 #include <vector>
 
-struct Vec3 {
-    float x {};
-    float y {};
-    float z {};
-};
-
-struct Vertex{
-    Vec3 position;
-    Vec3 normal;
+struct Vertices
+{
+    Vec3<float> position;
+    Vec3<float> normal;
+    Vec3<float> color;
 };
 
 class Mesh{
-
 public:
-
-    int getVerticesSize() const { return m_vertices.size();}
-    int getIndexesSize() const { return m_indices.size();}
-
-    const std::vector<Vertex>& getVertices() const { return m_vertices; }
-    const std::vector<unsigned int>& getIndices() const { return m_indices; }
-
+    void createRectangleMesh(float length, float width, float height, const Vec3<float>& center);
+    void loadFile(const std::filesystem::path& filePath);
+    void draw();
+    void computeNormals();
     void setupBuffers();
+    void destroyBuffers();
 
-    Mesh()
-        : m_vertices{
-            // Front face (z = +0.2)
-            {{-0.2f, -0.2f,  0.2f}, {0.0f, 0.0f, 1.0f}},
-            {{ 0.2f, -0.2f,  0.2f}, {0.0f, 0.0f, 1.0f}},
-            {{ 0.2f,  0.2f,  0.2f}, {0.0f, 0.0f, 1.0f}},
-            {{-0.2f, -0.2f,  0.2f}, {0.0f, 0.0f, 1.0f}},
-            {{ 0.2f,  0.2f,  0.2f}, {0.0f, 0.0f, 1.0f}},
-            {{-0.2f,  0.2f,  0.2f}, {0.0f, 0.0f, 1.0f}},
-
-            // Back face (z = -0.2)
-            {{ 0.2f, -0.2f, -0.2f}, {0.0f, 0.0f, -1.0f}},
-            {{-0.2f, -0.2f, -0.2f}, {0.0f, 0.0f, -1.0f}},
-            {{-0.2f,  0.2f, -0.2f}, {0.0f, 0.0f, -1.0f}},
-            {{ 0.2f, -0.2f, -0.2f}, {0.0f, 0.0f, -1.0f}},
-            {{-0.2f,  0.2f, -0.2f}, {0.0f, 0.0f, -1.0f}},
-            {{ 0.2f,  0.2f, -0.2f}, {0.0f, 0.0f, -1.0f}},
-
-            // Left face (x = -0.2)
-            {{-0.2f, -0.2f, -0.2f}, {-1.0f, 0.0f, 0.0f}},
-            {{-0.2f, -0.2f,  0.2f}, {-1.0f, 0.0f, 0.0f}},
-            {{-0.2f,  0.2f,  0.2f}, {-1.0f, 0.0f, 0.0f}},
-            {{-0.2f, -0.2f, -0.2f}, {-1.0f, 0.0f, 0.0f}},
-            {{-0.2f,  0.2f,  0.2f}, {-1.0f, 0.0f, 0.0f}},
-            {{-0.2f,  0.2f, -0.2f}, {-1.0f, 0.0f, 0.0f}},
-
-            // Right face (x = +0.2)
-            {{ 0.2f, -0.2f,  0.2f}, {1.0f, 0.0f, 0.0f}},
-            {{ 0.2f, -0.2f, -0.2f}, {1.0f, 0.0f, 0.0f}},
-            {{ 0.2f,  0.2f, -0.2f}, {1.0f, 0.0f, 0.0f}},
-            {{ 0.2f, -0.2f,  0.2f}, {1.0f, 0.0f, 0.0f}},
-            {{ 0.2f,  0.2f, -0.2f}, {1.0f, 0.0f, 0.0f}},
-            {{ 0.2f,  0.2f,  0.2f}, {1.0f, 0.0f, 0.0f}},
-
-            // Top face (y = +0.2)
-            {{-0.2f,  0.2f,  0.2f}, {0.0f, 1.0f, 0.0f}},
-            {{ 0.2f,  0.2f,  0.2f}, {0.0f, 1.0f, 0.0f}},
-            {{ 0.2f,  0.2f, -0.2f}, {0.0f, 1.0f, 0.0f}},
-            {{-0.2f,  0.2f,  0.2f}, {0.0f, 1.0f, 0.0f}},
-            {{ 0.2f,  0.2f, -0.2f}, {0.0f, 1.0f, 0.0f}},
-            {{-0.2f,  0.2f, -0.2f}, {0.0f, 1.0f, 0.0f}},
-
-            // Bottom face (y = -0.2)
-            {{-0.2f, -0.2f, -0.2f}, {0.0f, -1.0f, 0.0f}},
-            {{ 0.2f, -0.2f, -0.2f}, {0.0f, -1.0f, 0.0f}},
-            {{ 0.2f, -0.2f,  0.2f}, {0.0f, -1.0f, 0.0f}},
-            {{-0.2f, -0.2f, -0.2f}, {0.0f, -1.0f, 0.0f}},
-            {{ 0.2f, -0.2f,  0.2f}, {0.0f, -1.0f, 0.0f}},
-            {{-0.2f, -0.2f,  0.2f}, {0.0f, -1.0f, 0.0f}},
-        }
-    {
-
-        m_indices = {
-            0, 1, 2, 3, 4, 5,       // Front face
-            6, 7, 8, 9, 10, 11,     // Back face
-            12, 13, 14, 15, 16, 17, // Left face
-            18, 19, 20, 21, 22, 23, // Right face
-            24, 25, 26, 27, 28, 29, // Top face
-            30, 31, 32, 33, 34, 35  // Bottom face
-        };
-
-
-    }
-
+    std::vector<Vertices> m_vertices;
+    std::vector<unsigned int> m_indices;
 
 private:
-    std::vector<Vertex> m_vertices;
-    std::vector<unsigned int> m_indices;
-};
+    QOpenGLVertexArrayObject m_vao;
+    QOpenGLBuffer m_vbo;
+    QOpenGLBuffer m_ebo;
+    QOpenGLContext* m_context = nullptr;
+    bool m_buffersCreated = false;
 
+};
 
 #endif // MESH_H
