@@ -273,6 +273,7 @@ struct Skeleton {
 
                 //currPos = transfoIK.articulations_transformed_position[targetArticulation];
                 idBone = bones[idBone].fatherBone;
+                end = transfoIK.articulations_transformed_position[targetArticulation];
             }
             dist = (end - targetPosition).length();
             ++iteration;

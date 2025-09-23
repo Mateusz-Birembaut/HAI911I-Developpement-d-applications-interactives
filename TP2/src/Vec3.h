@@ -320,7 +320,7 @@ public:
 
     ////////        TRANSPOSE       /////////
     inline
-    void transpose()
+    Mat3* transpose()
     {
         float xy = vals[1] , xz = vals[2] , yz = vals[5];
         vals[1] = vals[3];
@@ -329,6 +329,7 @@ public:
         vals[6] = xz;
         vals[5] = vals[7];
         vals[7] = yz;
+        return this;
     }
     Mat3 getTranspose() const
     {
