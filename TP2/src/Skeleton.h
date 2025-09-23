@@ -241,35 +241,40 @@ struct Skeleton {
         // You should orient the articulation towards target position: -> find R
         // Note: you can use Mat3::getRotationMatrixAligning
         int iteration {0};
-        Vec3 end = transfoIK.articulations_transformed_position[targetArticulation] - targetPosition;
-        float dist{end.length()};
-        Vec3 currPos{transfoIK.articulations_transformed_position[targetArticulation]};
+        Vec3 end = transfoIK.articulations_transformed_position[targetArticulation];
+        float dist{(end - targetPosition).length()};
+        //Vec3 currPos{transfoIK.articulations_transformed_position[targetArticulation]};
+        float margin{0.01f};
 
-        while(  dist > epsilonPrecision && iteration < maxIterNumber ){
+
+        while( dist > margin && iteration < maxIterNumber ){
 
             int idBone = articulations[targetArticulation].fatherBone; 
 
-            while( idBone > -1 ){
+            //while( !bones[idBone].isRoot()){
+            while( idBone >= 0){
                 const Bone& b = bones[idBone];
 
                 unsigned int a0 = b.joints[0];
                 Vec3& art = transfoIK.articulations_transformed_position[a0];
 
-                Vec3 a0ToCurr = currPos - art;
+                Vec3 a0ToEnd = end - art;
                 Vec3 a0ToTarg = targetPosition - art;
 
-                a0ToCurr.normalize();
+                a0ToEnd.normalize();
                 a0ToTarg.normalize();
 
-                Mat3 rotation = Mat3::getRotationMatrixAligning(a0ToCurr, a0ToTarg);
+                Mat3 rotation = Mat3::getRotationMatrixAligning(a0ToEnd, a0ToTarg);
 
-    
+                // appliquer rotation
+                transfoIK.bone_transformations[idBone].localRotation = transfoIK.bone_transformations[idBone].localRotation * rotation;
 
-                computeGlobalTransformationParameters(transfoIK);
-                currPos = transfoIK.articulations_transformed_position[targetArticulation];
+                computeGlobalTransformationParameters(transfoIK); // update articulation position
+
+                //currPos = transfoIK.articulations_transformed_position[targetArticulation];
                 idBone = bones[idBone].fatherBone;
             }
-            dist = (currPos - targetPosition).length();
+            dist = (end - targetPosition).length();
             ++iteration;
         }
 
