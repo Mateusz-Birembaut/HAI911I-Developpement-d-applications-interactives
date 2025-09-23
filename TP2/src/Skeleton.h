@@ -251,7 +251,6 @@ struct Skeleton {
 
             int idBone = articulations[targetArticulation].fatherBone; 
 
-            //while( !bones[idBone].isRoot()){
             while( idBone >= 0){
                 const Bone& b = bones[idBone];
 
@@ -264,24 +263,24 @@ struct Skeleton {
                 a0ToEnd.normalize();
                 a0ToTarg.normalize();
 
-                Mat3 rotation = Mat3::getRotationMatrixAligning(a0ToEnd, a0ToTarg);
+                Mat3 rotationMonde = Mat3::getRotationMatrixAligning(a0ToEnd, a0ToTarg);
 
+                Mat3 rotationBoneMonde = (b.fatherBone >= 0) ? transfoIK.bone_transformations[b.fatherBone].world_space_rotation : Mat3::Identity();
+                Mat3 rotationBoneMondeT =  rotationBoneMonde;
+                rotationBoneMondeT.transpose();
+                Mat3 rotationLocale =  rotationBoneMondeT * rotationMonde * rotationBoneMonde;
+                
                 // appliquer rotation
-                transfoIK.bone_transformations[idBone].localRotation = transfoIK.bone_transformations[idBone].localRotation * rotation;
+                transfoIK.bone_transformations[idBone].localRotation = rotationLocale * transfoIK.bone_transformations[idBone].localRotation ;
 
                 computeGlobalTransformationParameters(transfoIK); // update articulation position
 
-                //currPos = transfoIK.articulations_transformed_position[targetArticulation];
                 idBone = bones[idBone].fatherBone;
                 end = transfoIK.articulations_transformed_position[targetArticulation];
             }
             dist = (end - targetPosition).length();
             ++iteration;
         }
-
-        //---------------------------------------------------//
-        //---------------------------------------------------//
-        //---------------------------------------------------//
     }
 
 
