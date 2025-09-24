@@ -57,7 +57,7 @@ void Mesh::compute_skinning_weights( Skeleton & skeleton ) {
     // you should compute weights for each vertex w.r.t. the skeleton bones
     // so each vertex will have B weights (B = number of bones)
     // these weights shoud be stored in vertex.w:
-    const double n {20.0};
+    const double n {70.0};
     // code to change :
     for(auto& vertex : V){
         double wsum {0.0};
