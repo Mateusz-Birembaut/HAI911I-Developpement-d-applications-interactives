@@ -329,7 +329,7 @@ void updateMeshVertexPositionsFromARAPSolver() {
             for( std::map< unsigned int , double >::const_iterator it = edgeAndVertexWeights.get_weight_of_adjacent_edges_it_begin(v) ;
                  it != edgeAndVertexWeights.get_weight_of_adjacent_edges_it_end(v) ; ++it) {
                 unsigned int vNeighbor = it->first;
-                //double wij = it->second;
+                double wij = it->second;
                 Eigen::VectorXd initialEdge(3);
                 Eigen::VectorXd rotatedEdge(3);
                 for( unsigned int coord = 0 ; coord < 3 ; ++coord ) {
@@ -338,7 +338,7 @@ void updateMeshVertexPositionsFromARAPSolver() {
                 }
 
                 // WHAT TO PUT HERE ??????? How to update the entries of the tensor matrix ?
-                tensorMatrix +=  rotatedEdge * initialEdge.transpose();
+                tensorMatrix += rotatedEdge * initialEdge.transpose();
             }
             vertexRotationMatrices[v] = getClosestRotation( tensorMatrix );
         }
@@ -1009,8 +1009,8 @@ int main (int argc, char ** argv) {
     mesh.loadOFF(argc == 2 ? argv[1] : "models/arma.off");
     verticesAreMarkedForCurrentHandle.resize( mesh.V.size() , false );
     verticesHandles.resize( mesh.V.size() , -1 );
-    //edgeAndVertexWeights.buildCotangentWeightsOfTriangleMesh( mesh);
-    edgeAndVertexWeights.buildBarycentricWeightsOfTriangleMesh(mesh.V, mesh.T);
+    edgeAndVertexWeights.buildCotangentWeightsOfTriangleMesh( mesh);
+    //edgeAndVertexWeights.buildBarycentricWeightsOfTriangleMesh(mesh.V, mesh.T);
     Eigen::MatrixXd idMatrix = Eigen::MatrixXd::Identity(3,3);
     vertexRotationMatrices.resize( mesh.V.size() , idMatrix );
 

@@ -128,10 +128,32 @@ public:
             // Compute cotangent of this angle
             // Add to edge weight 
 
+            for( unsigned int t = 0 ; t < mesh.T.size() ; ++t )
+            {
 
+                MeshTriangle tri =  mesh.T[t];
 
-            
-        //for(const auto& meshVertex )
+                unsigned int v0= tri[0];
+                unsigned int v2= tri[1];
+                unsigned int v1= tri[2];
+
+                Vec3 e0( mesh.V[v0][0] , mesh.V[v0][1] , mesh.V[v0][2] );
+                Vec3 e1( mesh.V[v1][0] , mesh.V[v1][1] , mesh.V[v1][2] );
+                Vec3 e2( mesh.V[v2][0] , mesh.V[v2][1] , mesh.V[v2][2] );
+    
+                double cot0 = Vec3::dot(e1, e2) / Vec3::cross(e1, e2).norm(); 
+                double cot1 = Vec3::dot(e2, e0) / Vec3::cross(e2, e0).norm(); 
+                double cot2 = Vec3::dot(e0, e1) / Vec3::cross(e0, e1).norm(); 
+        
+                edge_weights[v1][v2] += 0.5 * cot0;
+                edge_weights[v2][v1] += 0.5 * cot0;
+        
+                edge_weights[v2][v0] += 0.5 * cot1;
+                edge_weights[v0][v2] += 0.5 * cot1;
+        
+                edge_weights[v0][v1] += 0.5 * cot2;
+                edge_weights[v1][v0] += 0.5 * cot2; 
+            }
 
     }
 
