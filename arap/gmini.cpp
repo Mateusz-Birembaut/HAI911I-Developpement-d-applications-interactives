@@ -196,7 +196,7 @@ void updateSystem() {
             it != edgeAndVertexWeights.get_weight_of_adjacent_edges_it_end(v) ; ++it) {
             nbVoisin++;
             unsigned int vNeighbor = it->first;
-
+            auto w = it->second;
             // ajoute un ligne
             // avec coord de V a 1 et coord de voisin -1
             // indice 1 ligne
@@ -211,13 +211,13 @@ void updateSystem() {
             //std::cout << "indice de x de v dans la matrice : " << indexV << '\n';
             //std::cout << "indice de x de voisin dans la matrice : " << indexVoisin << '\n';
 
-            arapLinearSystem.A(curRow, indexV) = -1;
-            arapLinearSystem.A(curRow+1, indexV+1) = -1;
-            arapLinearSystem.A(curRow+2, indexV+2) = -1;
+            arapLinearSystem.A(curRow, indexV) = -w;
+            arapLinearSystem.A(curRow+1, indexV+1) = -w;
+            arapLinearSystem.A(curRow+2, indexV+2) = -w;
 
-            arapLinearSystem.A(curRow, indexVoisin) = 1;
-            arapLinearSystem.A(curRow+1, indexVoisin+1) = 1;
-            arapLinearSystem.A(curRow+2, indexVoisin+2) = 1;
+            arapLinearSystem.A(curRow, indexVoisin) = w;
+            arapLinearSystem.A(curRow+1, indexVoisin+1) = w;
+            arapLinearSystem.A(curRow+2, indexVoisin+2) = w;
 
             curRow += 3;
         }
@@ -276,6 +276,7 @@ void updateMeshVertexPositionsFromARAPSolver() {
             for( std::map< unsigned int , double >::const_iterator it = edgeAndVertexWeights.get_weight_of_adjacent_edges_it_begin(v) ;
                 it != edgeAndVertexWeights.get_weight_of_adjacent_edges_it_end(v) ; ++it) {
                 unsigned int vNeighbor = it->first;
+                auto w = it->second;
                 Eigen::VectorXd rotatedEdge(3);
                 for( unsigned int coord = 0 ; coord < 3 ; ++coord )
                     rotatedEdge[coord] = mesh.V[vNeighbor].pInit[coord]  -  mesh.V[v].pInit[coord];
@@ -283,9 +284,9 @@ void updateMeshVertexPositionsFromARAPSolver() {
                 rotatedEdge = vertexRotationMatrices[v] * rotatedEdge;
 
                 
-                arapLinearSystem.b( curRow) = rotatedEdge[0];
-                arapLinearSystem.b( curRow+1) = rotatedEdge[1];
-                arapLinearSystem.b( curRow+2) = rotatedEdge[2];
+                arapLinearSystem.b( curRow) = w*rotatedEdge[0];
+                arapLinearSystem.b( curRow+1) = w*rotatedEdge[1];
+                arapLinearSystem.b( curRow+2) = w*rotatedEdge[2];
                 // WHAT TO PUT HERE ??????? How to update the entries of b ?
                 curRow +=3; 
             }
@@ -329,7 +330,7 @@ void updateMeshVertexPositionsFromARAPSolver() {
             for( std::map< unsigned int , double >::const_iterator it = edgeAndVertexWeights.get_weight_of_adjacent_edges_it_begin(v) ;
                  it != edgeAndVertexWeights.get_weight_of_adjacent_edges_it_end(v) ; ++it) {
                 unsigned int vNeighbor = it->first;
-                //double wij = it->second;
+                double wij = it->second;
                 Eigen::VectorXd initialEdge(3);
                 Eigen::VectorXd rotatedEdge(3);
                 for( unsigned int coord = 0 ; coord < 3 ; ++coord ) {
@@ -338,7 +339,7 @@ void updateMeshVertexPositionsFromARAPSolver() {
                 }
 
                 // WHAT TO PUT HERE ??????? How to update the entries of the tensor matrix ?
-                tensorMatrix += rotatedEdge * initialEdge.transpose();
+                tensorMatrix += wij * rotatedEdge * initialEdge.transpose();
             }
             vertexRotationMatrices[v] = getClosestRotation( tensorMatrix );
         }
