@@ -134,25 +134,26 @@ public:
                 MeshTriangle tri =  mesh.T[t];
 
                 unsigned int v0= tri[0];
-                unsigned int v2= tri[1];
-                unsigned int v1= tri[2];
+                unsigned int v1= tri[1];
+                unsigned int v2= tri[2];
 
-                Vec3 e0( mesh.V[v0][0] , mesh.V[v0][1] , mesh.V[v0][2] );
-                Vec3 e1( mesh.V[v1][0] , mesh.V[v1][1] , mesh.V[v1][2] );
-                Vec3 e2( mesh.V[v2][0] , mesh.V[v2][1] , mesh.V[v2][2] );
+                Vec3 p0 = mesh.V[v0];
+                Vec3 p1 = mesh.V[v1];
+                Vec3 p2 = mesh.V[v2];
     
-                double cot0 = Vec3::dot(e1, e2) / Vec3::cross(e1, e2).norm(); 
-                double cot1 = Vec3::dot(e2, e0) / Vec3::cross(e2, e0).norm(); 
-                double cot2 = Vec3::dot(e0, e1) / Vec3::cross(e0, e1).norm(); 
-        
-                edge_weights[v1][v2] += 0.5 * cot0;
-                edge_weights[v2][v1] += 0.5 * cot0;
-        
-                edge_weights[v2][v0] += 0.5 * cot1;
-                edge_weights[v0][v2] += 0.5 * cot1;
-        
-                edge_weights[v0][v1] += 0.5 * cot2;
-                edge_weights[v1][v0] += 0.5 * cot2; 
+                // angle coté 0 a distribuer a v1 et v2 (*0.5)
+                double angle0 = Vec3::dot( p1 - p0, p2 - p0) / Vec3::cross( p1 - p0, p2 - p0).norm(); 
+                edge_weights[v1][v2] += 0.5 * angle0;
+                edge_weights[v2][v1] += 0.5 * angle0;
+
+                double angle1 = Vec3::dot( p0 - p1, p2 - p1) / Vec3::cross( p0 - p1, p2 - p1).norm(); 
+                edge_weights[v2][v0] += 0.5 * angle1;
+                edge_weights[v0][v2] += 0.5 * angle1;
+
+                double angle2 = Vec3::dot( p0 - p2, p1 - p2) / Vec3::cross( p0 - p2, p1 - p2).norm(); 
+                edge_weights[v0][v1] += 0.5 * angle2;
+                edge_weights[v1][v0] += 0.5 * angle2; 
+
             }
 
     }

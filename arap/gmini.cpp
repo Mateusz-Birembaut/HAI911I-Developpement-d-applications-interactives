@@ -329,7 +329,7 @@ void updateMeshVertexPositionsFromARAPSolver() {
             for( std::map< unsigned int , double >::const_iterator it = edgeAndVertexWeights.get_weight_of_adjacent_edges_it_begin(v) ;
                  it != edgeAndVertexWeights.get_weight_of_adjacent_edges_it_end(v) ; ++it) {
                 unsigned int vNeighbor = it->first;
-                double wij = it->second;
+                //double wij = it->second;
                 Eigen::VectorXd initialEdge(3);
                 Eigen::VectorXd rotatedEdge(3);
                 for( unsigned int coord = 0 ; coord < 3 ; ++coord ) {
