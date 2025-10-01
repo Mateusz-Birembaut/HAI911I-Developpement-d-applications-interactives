@@ -144,22 +144,36 @@ public:
                 Vec3 edge1 =  p1 - p0;
                 Vec3 edge2 =  p2 - p0;
                 // angle coté 0 a distribuer a v1 et v2 (*0.5)
-                double angle0 = Vec3::dot( edge1, edge2) / edge1.norm() * edge2.norm() ; 
-                edge_weights[v1][v2] += 0.5 * angle0;
-                edge_weights[v2][v1] += 0.5 * angle0;
+                double norm1 = edge1.norm();
+                double norm2 = edge2.norm();
+                if (norm1 > 1e-6 && norm2 > 1e-6) {
+                    double cos_angle0 = (Vec3::dot( edge1, edge2)) / (edge1.norm() * edge2.norm()) ; 
+                    double sin_angle0 = (Vec3::cross(edge1, edge2).norm()) / (edge1.norm() * edge2.norm());
+                    edge_weights[v1][v2] += 0.5 *   std::abs((cos_angle0 / sin_angle0));
+                    edge_weights[v2][v1] += 0.5 *   std::abs((cos_angle0 / sin_angle0));
+                }
 
                 edge1 = p0 - p1;
                 edge2 = p2 - p1;
-                double angle1 = Vec3::dot( edge1, edge2) / edge1.norm() * edge2.norm(); 
-                edge_weights[v2][v0] += 0.5 * angle1;
-                edge_weights[v0][v2] += 0.5 * angle1;
+                norm1 = edge1.norm();
+                norm2 = edge2.norm();
+                if (norm1 > 1e-6 && norm2 > 1e-6) {
+                    double cos_angle1 = (Vec3::dot( edge1, edge2)) / (edge1.norm() * edge2.norm()); 
+                    double sin_angle1 = (Vec3::cross(edge1, edge2).norm()) / (edge1.norm() * edge2.norm());
+                    edge_weights[v2][v0] += 0.5 *   std::abs((cos_angle1 / sin_angle1));
+                    edge_weights[v0][v2] += 0.5 *   std::abs((cos_angle1 / sin_angle1));
+                }
 
                 edge1 =  p0 - p2;
                 edge2 = p1 - p2;
-                double angle2 = Vec3::dot( edge1, edge2) / edge1.norm() * edge2.norm(); 
-                edge_weights[v0][v1] += 0.5 * angle2;
-                edge_weights[v1][v0] += 0.5 * angle2; 
-
+                norm1 = edge1.norm();
+                norm2 = edge2.norm();
+                if (norm1 > 1e-6 && norm2 > 1e-6) {
+                    double cos_angle2 = (Vec3::dot( edge1, edge2)) / (edge1.norm() * edge2.norm()); 
+                    double sin_angle2 = (Vec3::cross(edge1, edge2).norm()) / (edge1.norm() * edge2.norm());
+                    edge_weights[v0][v1] += 0.5 * std::abs((cos_angle2 / sin_angle2));
+                    edge_weights[v1][v0] += 0.5 *   std::abs((cos_angle2 / sin_angle2)); 
+                }
             }
 
     }

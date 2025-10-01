@@ -205,6 +205,8 @@ void updateSystem() {
             int indexV {v*3};
             int indexVoisin {vNeighbor*3};
 
+            //std::cout <<"Poid dune arete : " << w << '\n';
+            
             //std::cout << "current row  : " << curRow << '\n';
             //std::cout << "indice courant : " << v << '\n';
             //std::cout << "indice voisin : " << vNeighbor << '\n';
@@ -281,12 +283,12 @@ void updateMeshVertexPositionsFromARAPSolver() {
                 for( unsigned int coord = 0 ; coord < 3 ; ++coord )
                     rotatedEdge[coord] = mesh.V[vNeighbor].pInit[coord]  -  mesh.V[v].pInit[coord];
 
-                rotatedEdge = vertexRotationMatrices[v] * rotatedEdge;
+                rotatedEdge = vertexRotationMatrices[v] * rotatedEdge * w ;
 
                 
-                arapLinearSystem.b( curRow) = w*rotatedEdge[0];
-                arapLinearSystem.b( curRow+1) = w*rotatedEdge[1];
-                arapLinearSystem.b( curRow+2) = w*rotatedEdge[2];
+                arapLinearSystem.b( curRow) = rotatedEdge[0];
+                arapLinearSystem.b( curRow+1) = rotatedEdge[1];
+                arapLinearSystem.b( curRow+2) = rotatedEdge[2];
                 // WHAT TO PUT HERE ??????? How to update the entries of b ?
                 curRow +=3; 
             }
@@ -339,7 +341,7 @@ void updateMeshVertexPositionsFromARAPSolver() {
                 }
 
                 // WHAT TO PUT HERE ??????? How to update the entries of the tensor matrix ?
-                tensorMatrix += wij * rotatedEdge * initialEdge.transpose();
+                tensorMatrix +=  rotatedEdge * initialEdge.transpose() * wij ;
             }
             vertexRotationMatrices[v] = getClosestRotation( tensorMatrix );
         }
