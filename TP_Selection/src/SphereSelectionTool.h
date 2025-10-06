@@ -116,8 +116,20 @@ struct SphereSelectionTool
 
 	void draw() {
         if(! isActive) return;
-	    // draw Sphere
-		drawSphere1( center[0] , center[1] , center[2] , radius , 10 , 10 );
+
+        GLint polygonMode[2];
+        glGetIntegerv(GL_POLYGON_MODE, polygonMode);
+        
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        
+        glDisable(GL_LIGHTING);
+        
+        glColor3f(1.0f, 1.0f, 0.0f); 
+
+        drawSphere1(center[0], center[1], center[2], radius, 10, 10);
+        
+        glPolygonMode(GL_FRONT_AND_BACK, polygonMode[0]);
+        glEnable(GL_LIGHTING);
 	}
 };
 #endif

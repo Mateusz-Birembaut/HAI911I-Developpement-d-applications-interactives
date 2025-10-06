@@ -50,6 +50,7 @@ static bool mouseZoomPressed = false;
 static int lastX=0, lastY=0, lastZoom=0;
 static unsigned int FPS = 0;
 static bool fullScreen = false;
+static double rayon = 0.5f;
 
 enum ViewerState {
     ViewerState_NORMAL ,
@@ -399,6 +400,7 @@ void rotateActiveHandle( Vec3 const & rotationAxis , double angle ) {
 
 void get3DPosFromMouseInput(int x, int y, float &posX, float &posY, float &posZ)
 {
+    gluUnProject(x, y, posX, posY, posZ);
 }
 
 void setTagForVerticesInSphere(bool tagToSet)
@@ -410,11 +412,13 @@ void updateSphereRadiusWithScroll(int button)
 {
     if(button == 3) //scroll up
     {
+        selectionRadius += 0.1f;
     }
     else if(button == 4) //scroll down
     {
-        
+        selectionRadius = std::min(rayon-0.1f, 0.0f);
     }
+
 
 }
 
@@ -906,6 +910,7 @@ void mouse (int button, int state, int x, int y) {
                        float posX,posY,posZ;
                         get3DPosFromMouseInput(x,y, posX, posY, posZ);
                         Vec3 pos(posX, posY, posZ);
+                        std::cout << posX << posY << posZ << '\n';
                         sphereSelectionTool.initSphere(pos, selectionRadius);
                         sphereSelectionTool.isAdding = true;
                         sphereSelectionTool.isActive = true;

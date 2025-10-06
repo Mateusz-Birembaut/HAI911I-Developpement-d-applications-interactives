@@ -400,7 +400,7 @@ void rotateActiveHandle( Vec3 const & rotationAxis , double angle ) {
 void get3DPosFromMouseInput(int x, int y, float &posX, float &posY, float &posZ)
 {
 
-    GLdouble winX, winY, winZ;
+    GLfloat winX, winY, winZ;
 
     GLdouble modelview[16];
     GLdouble projection[16];
@@ -414,7 +414,7 @@ void get3DPosFromMouseInput(int x, int y, float &posX, float &posY, float &posZ)
 
     winX = static_cast<GLdouble>(x);
     winY = static_cast<GLdouble>(viewport[3] - y);
-    glReadPixels(x, viewport[3] - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+    glReadPixels(x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
 
     gluUnProject(winX, winY, winZ, modelview, projection, viewport , &glPosX, &glPosY, &glPosZ);
 
@@ -440,12 +440,29 @@ void updateSphereRadiusWithScroll(int button)
     if(button == 3) //scroll up
     {
         selectionRadius += 0.05f;
+        sphereSelectionTool.updateSphere(selectionRadius);
+        if( sphereSelectionTool.isActive){
+            for( unsigned int v = 0 ; v < mesh.V.size() ; ++v ) {
+                Vec3 const & p = mesh.V[ v ].p;
+                if( sphereSelectionTool.contains( p ) ) verticesAreMarkedForCurrentHandle[ v ] = true;
+                else  verticesAreMarkedForCurrentHandle[ v ] = false;
+            }
+        }
     }
     else if(button == 4) //scroll down
     {
         selectionRadius = std::max(0.05f, selectionRadius-0.05f);
+        sphereSelectionTool.updateSphere(selectionRadius);
+        if( sphereSelectionTool.isActive){
+            for( unsigned int v = 0 ; v < mesh.V.size() ; ++v ) {
+                Vec3 const & p = mesh.V[ v ].p;
+                if( sphereSelectionTool.contains( p ) ) verticesAreMarkedForCurrentHandle[ v ] = true;
+                else  verticesAreMarkedForCurrentHandle[ v ] = false;
+            }
+        }
+
+
     }
-    sphereSelectionTool.updateSphere(selectionRadius);
 
 }
 
@@ -865,6 +882,7 @@ void key (unsigned char keyPressed, int x, int y) {
     case GLUT_KEY_ENTER:
         if( viewerState == ViewerState_EDITINGHANDLE ) {
             viewerState = ViewerState_NORMAL;
+            sphereSelectionTool.isActive = false;
             finalizeEditingOfCurrentHandle();
         }
         break;

@@ -8,6 +8,7 @@ struct RectangleSelectionTool {
     bool isAdding; // or it is removing
     bool isActive;
     RectangleSelectionTool() : xStart(0) , xEnd(0) , yStart(0) , yEnd(0) , isActive(false) {}
+    
     void initRectangle(int x , int y) {
         xStart = xEnd = x;
         yStart = yEnd = y;
