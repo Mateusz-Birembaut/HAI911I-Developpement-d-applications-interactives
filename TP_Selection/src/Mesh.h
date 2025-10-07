@@ -87,6 +87,45 @@ public:
             }
         glEnd ();
     }
+
+    MeshVertex findClosestPoint(const Vec3& point) const {
+        float minDistance = (V[0].p - point).norm();
+        int indexMin = 0;
+        for (unsigned int i = 1; i < V.size(); i++)
+        {
+            float currentDistance = (V[i].p - point).norm();
+            if(currentDistance < minDistance){
+                minDistance = currentDistance;
+                indexMin = i;
+            }
+        }
+        return V[indexMin];
+    }
+
+    MeshVertex randomVertex() const {
+        int randomIndex = rand() % V.size();
+        return V[randomIndex];
+    }
+
+    unsigned int getIndexOfVertex(const MeshVertex& vertex) const {
+        for (unsigned int i = 0; i < V.size(); i++) {
+            if (V[i].p[0] == vertex.p[0] && V[i].p[1] == vertex.p[1] && V[i].p[2] == vertex.p[2]) {
+                return i;
+            }
+        }
+        return -1; 
+    }
+
+    unsigned int getIndexOfVertex(const Vec3& point) const {
+        for (unsigned int i = 0; i < V.size(); i++) {
+            if (V[i].p[0] == point[0] && V[i].p[1] == point[1] && V[i].p[2] == point[2]) {
+                return i;
+            }
+        }
+        return -1; 
+    }
+
+
 };
 
 
