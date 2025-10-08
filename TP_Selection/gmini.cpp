@@ -121,7 +121,6 @@ void testlinearSystem() {
         Eigen::VectorXd X;
         mySystem.solve(X);
 
-        std::cout << X[0] << "  " << X[1] << "  " << X[2] << std::endl;
     }
 }
 //------------------------------------------------------------------------------------------------------//
@@ -418,7 +417,6 @@ void get3DPosFromMouseInput(int x, int y, float &posX, float &posY, float &posZ)
 
     gluUnProject(winX, winY, winZ, modelview, projection, viewport , &glPosX, &glPosY, &glPosZ);
 
-    std::cout << glPosX << glPosY << glPosZ << '\n';
 
     posX = static_cast<float>(glPosX);
     posY = static_cast<float>(glPosY);
@@ -431,7 +429,7 @@ void setTagForVerticesInSphere(bool tagToSet)
     // check if vertices are inside the sphere
     for( unsigned int v = 0 ; v < mesh.V.size() ; ++v ) {
         Vec3 const & p = mesh.V[ v ].p;
-        if( sphereSelectionTool.contains( p ) ) verticesAreMarkedForCurrentHandle[ v ] = tagToSet;
+        if( sphereSelectionTool.contains( p, mesh ) ) verticesAreMarkedForCurrentHandle[ v ] = tagToSet;
     }
 }
 
@@ -442,11 +440,7 @@ void updateSphereRadiusWithScroll(int button)
         selectionRadius += 0.05f;
         sphereSelectionTool.updateSphere(selectionRadius);
         if( sphereSelectionTool.isActive){
-            for( unsigned int v = 0 ; v < mesh.V.size() ; ++v ) {
-                Vec3 const & p = mesh.V[ v ].p;
-                if( sphereSelectionTool.contains( p ) ) verticesAreMarkedForCurrentHandle[ v ] = true;
-                else  verticesAreMarkedForCurrentHandle[ v ] = false;
-            }
+            setTagForVerticesInSphere( sphereSelectionTool.isAdding);
         }
     }
     else if(button == 4) //scroll down
@@ -454,11 +448,7 @@ void updateSphereRadiusWithScroll(int button)
         selectionRadius = std::max(0.05f, selectionRadius-0.05f);
         sphereSelectionTool.updateSphere(selectionRadius);
         if( sphereSelectionTool.isActive){
-            for( unsigned int v = 0 ; v < mesh.V.size() ; ++v ) {
-                Vec3 const & p = mesh.V[ v ].p;
-                if( sphereSelectionTool.contains( p ) ) verticesAreMarkedForCurrentHandle[ v ] = true;
-                else  verticesAreMarkedForCurrentHandle[ v ] = false;
-            }
+            setTagForVerticesInSphere( sphereSelectionTool.isAdding);
         }
 
 
@@ -758,6 +748,7 @@ void draw () {
     drawHandles();
     rectangleSelectionTool.draw();
     sphereSelectionTool.draw();
+    //sphereSelectionTool.drawPath(mesh);
 }
 
 void display () {
@@ -956,7 +947,7 @@ void mouse (int button, int state, int x, int y) {
                        float posX,posY,posZ;
                         get3DPosFromMouseInput(x,y, posX, posY, posZ);
                         Vec3 pos(posX, posY, posZ);
-                        sphereSelectionTool.initSphere(pos, selectionRadius);
+                        sphereSelectionTool.initSphere(pos, selectionRadius, mesh, edgeAndVertexWeights);
                         sphereSelectionTool.isAdding = true;
                         sphereSelectionTool.isActive = true;
                     }
@@ -972,7 +963,7 @@ void mouse (int button, int state, int x, int y) {
                         float posX,posY,posZ;
                         get3DPosFromMouseInput(x,y, posX, posY, posZ);
                         Vec3 pos(posX, posY, posZ);
-                        sphereSelectionTool.initSphere(pos, selectionRadius);
+                        sphereSelectionTool.initSphere(pos, selectionRadius, mesh, edgeAndVertexWeights);
                         sphereSelectionTool.isAdding = false;
                         sphereSelectionTool.isActive = true;
                     }
@@ -1062,8 +1053,8 @@ int main (int argc, char ** argv) {
     mesh.loadOFF(argc == 2 ? argv[1] : "models/arma.off");
     verticesAreMarkedForCurrentHandle.resize( mesh.V.size() , false );
     verticesHandles.resize( mesh.V.size() , -1 );
-    edgeAndVertexWeights.buildCotangentWeightsOfTriangleMesh( mesh);
-    //edgeAndVertexWeights.buildBarycentricWeightsOfTriangleMesh(mesh.V, mesh.T);
+    //edgeAndVertexWeights.buildCotangentWeightsOfTriangleMesh( mesh);
+    edgeAndVertexWeights.buildBarycentricWeightsOfTriangleMesh(mesh.V, mesh.T);
     Eigen::MatrixXd idMatrix = Eigen::MatrixXd::Identity(3,3);
     vertexRotationMatrices.resize( mesh.V.size() , idMatrix );
 

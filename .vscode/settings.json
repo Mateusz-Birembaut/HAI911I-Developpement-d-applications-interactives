@@ -75,6 +75,7 @@
         "semaphore": "cpp",
         "__nullptr": "cpp",
         "queue": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "unordered_set": "cpp"
     }
 }
