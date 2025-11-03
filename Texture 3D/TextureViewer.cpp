@@ -13,7 +13,7 @@ TextureViewer::TextureViewer(QWidget *parent):QGLViewer(parent){
 void TextureViewer::draw(){
 
     drawClippingPlane();
-    //drawMesh();
+    drawMesh();
 
     glEnable(GL_DEPTH_TEST);
 

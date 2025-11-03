@@ -115,7 +115,7 @@ void Window::open3DMesh(){
         return;
     }
 
-    statusBar()->showMessage("Opening 3D image...");
+    statusBar()->showMessage("Opening 3D mesh...");
     if(fileName.endsWith(".off") ){
         viewer->openOffMesh(fileName);
         statusBar()->showMessage("3D mesh opened");
